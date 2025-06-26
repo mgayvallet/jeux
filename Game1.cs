@@ -21,6 +21,8 @@ namespace jeux
         private Texture2D _spriteTerre;
         private Texture2D _spriteTerreLabouree;
         private Texture2D _spriteCoffre;
+        private Texture2D _spriteEau;
+        private Texture2D _spritePont;
 
         private Vector2 _playerPosition;
         private Vector2 _treePosition;
@@ -77,6 +79,8 @@ namespace jeux
             _spriteTerre = Content.Load<Texture2D>("Sprite-Terre");
             _spriteTerreLabouree = Content.Load<Texture2D>("Sprite-Terre-Labouré");
             _spriteCoffre = Content.Load<Texture2D>("Sprite-Coffre");
+            _spriteEau = Content.Load<Texture2D>("Sprite-Ocean");
+            _spritePont = Content.Load<Texture2D>("Sprite-Pont");
         }
 
         protected override void Update(GameTime gameTime)
@@ -133,10 +137,13 @@ namespace jeux
 
             if (_tiles != null &&
                 futureTileX >= 0 && futureTileX < _tiles.GetLength(0) &&
-                futureTileY >= 0 && futureTileY < _tiles.GetLength(1) &&
-                _tiles[futureTileX, futureTileY] != 0)
+                futureTileY >= 0 && futureTileY < _tiles.GetLength(1))
             {
-                _playerPosition = newPosition;
+                uint futureTile = _tiles[futureTileX, futureTileY];
+                if (futureTile != 0 && futureTile != 5)
+                {
+                    _playerPosition = newPosition;
+                }
             }
 
             _playerPosition.X = MathHelper.Clamp(_playerPosition.X, _playerSprite.Width / 2, _graphics.PreferredBackBufferWidth - _playerSprite.Width / 2);
@@ -161,7 +168,7 @@ namespace jeux
             {
                 uint targetTile = _tiles[targetX, targetY];
 
-                if (targetTile != 0)
+                if (targetTile != 0 && targetTile != 5 && targetTile != 4)
                 {
                     if (mouse.LeftButton == ButtonState.Pressed)
                     {
@@ -174,7 +181,6 @@ namespace jeux
                     else if (mouse.RightButton == ButtonState.Pressed && targetTile == 2)
                     {
                         _tiles[targetX, targetY] = 3;
-                        _compteurAction++;
                     }
                 }
             }
@@ -228,6 +234,8 @@ namespace jeux
                             case 0: _spriteBatch.Draw(_spriteCoffre, tilePosition, Color.White); break;
                             case 2: _spriteBatch.Draw(_spriteTerre, tilePosition, Color.White); break;
                             case 3: _spriteBatch.Draw(_spriteTerreLabouree, tilePosition, Color.White); break;
+                            case 4: _spriteBatch.Draw(_spritePont, tilePosition, Color.White); break;
+                            case 5: _spriteBatch.Draw(_spriteEau, tilePosition, Color.White); break;
                         }
                     }
                 }
