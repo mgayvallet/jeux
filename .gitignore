@@ -1,0 +1,41 @@
+# Ignore build outputs
+bin/
+obj/
+
+# User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# MonoGame cache
+*.mgcb.cache
+
+# Visual Studio Code settings
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Debug/Release folders
+**/Debug/
+**/Release/
+
+# Fonts compiled by MonoGame
+Content/**/*.xnb
+
+# Logs and temporary files
+*.log
+*.tmp
+
+# Map file (if you want to regenerate it every time)
+# map.txt
+
+# Dotnet artifacts
+*.nupkg
+*.snupkg
+
+# Others
+*.bak
+*.old
