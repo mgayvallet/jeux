@@ -23,6 +23,8 @@ namespace jeux
         private Texture2D _spriteCoffre;
         private Texture2D _spriteEau;
         private Texture2D _spritePont;
+        private Texture2D _spriteGraineMais;
+        private Texture2D _spriteGraineCarotte;
 
         private Vector2 _playerPosition;
         private Vector2 _treePosition;
@@ -32,6 +34,8 @@ namespace jeux
 
         private uint[,] _tiles;
         private int _compteurAction = 0;
+
+        private MouseState _prevMouseState;
 
         public Game1()
         {
@@ -81,112 +85,136 @@ namespace jeux
             _spriteCoffre = Content.Load<Texture2D>("Sprite-Coffre");
             _spriteEau = Content.Load<Texture2D>("Sprite-Ocean");
             _spritePont = Content.Load<Texture2D>("Sprite-Pont");
+            _spriteGraineMais = Content.Load<Texture2D>("Sprite-Graine-Mais-Planter");
+            _spriteGraineCarotte = Content.Load<Texture2D>("Sprite-Graine-Carottes-Planter");
         }
 
-        protected override void Update(GameTime gameTime)
+protected override void Update(GameTime gameTime)
+{
+    var k = Keyboard.GetState();
+    var mouse = Mouse.GetState();
+
+    if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || k.IsKeyDown(Keys.Escape))
+        _isStartScreen = true;
+
+    if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || k.IsKeyDown(Keys.Back))
+        Exit();
+
+    if (_isStartScreen)
+    {
+        if (k.IsKeyDown(Keys.Space))
+            _isStartScreen = false;
+
+        base.Update(gameTime);
+        return;
+    }
+
+    float speedPerSecond = 400f;
+    float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+    Vector2 newPosition = _playerPosition;
+
+    if (k.IsKeyDown(Keys.Z) || k.IsKeyDown(Keys.Up))
+    {
+        _facingDirection = Direction.Up;
+        _playerSprite = Content.Load<Texture2D>("Sprite-Back");
+        newPosition.Y -= speedPerSecond * deltaTime;
+    }
+    else if (k.IsKeyDown(Keys.S) || k.IsKeyDown(Keys.Down))
+    {
+        _facingDirection = Direction.Down;
+        _playerSprite = Content.Load<Texture2D>("Sprite-Face");
+        newPosition.Y += speedPerSecond * deltaTime;
+    }
+
+    if (k.IsKeyDown(Keys.D) || k.IsKeyDown(Keys.Right))
+    {
+        _facingDirection = Direction.Right;
+        _playerSprite = Content.Load<Texture2D>("Sprite-Profile-Droite");
+        newPosition.X += speedPerSecond * deltaTime;
+    }
+    else if (k.IsKeyDown(Keys.Q) || k.IsKeyDown(Keys.Left))
+    {
+        _facingDirection = Direction.Left;
+        _playerSprite = Content.Load<Texture2D>("Sprite-Profile-Gauche");
+        newPosition.X -= speedPerSecond * deltaTime;
+    }
+
+    int tileSize = 32;
+    int futureTileX = (int)newPosition.X / tileSize;
+    int futureTileY = (int)newPosition.Y / tileSize;
+
+    if (_tiles != null &&
+        futureTileX >= 0 && futureTileX < _tiles.GetLength(0) &&
+        futureTileY >= 0 && futureTileY < _tiles.GetLength(1))
+    {
+        uint futureTile = _tiles[futureTileX, futureTileY];
+        if (futureTile != 0 && futureTile != 5)
         {
-            var k = Keyboard.GetState();
-            var mouse = Mouse.GetState();
-
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || k.IsKeyDown(Keys.Escape))
-                Exit();
-
-            if (_isStartScreen)
-            {
-                if (k.IsKeyDown(Keys.Space))
-                    _isStartScreen = false;
-
-                base.Update(gameTime);
-                return;
-            }
-
-            float speedPerSecond = 400f;
-            float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
-
-            Vector2 newPosition = _playerPosition;
-
-            if (k.IsKeyDown(Keys.Z) || k.IsKeyDown(Keys.Up))
-            {
-                _facingDirection = Direction.Up;
-                _playerSprite = Content.Load<Texture2D>("Sprite-Back");
-                newPosition.Y -= speedPerSecond * deltaTime;
-            }
-            else if (k.IsKeyDown(Keys.S) || k.IsKeyDown(Keys.Down))
-            {
-                _facingDirection = Direction.Down;
-                _playerSprite = Content.Load<Texture2D>("Sprite-Face");
-                newPosition.Y += speedPerSecond * deltaTime;
-            }
-
-            if (k.IsKeyDown(Keys.D) || k.IsKeyDown(Keys.Right))
-            {
-                _facingDirection = Direction.Right;
-                _playerSprite = Content.Load<Texture2D>("Sprite-Profile-Droite");
-                newPosition.X += speedPerSecond * deltaTime;
-            }
-            else if (k.IsKeyDown(Keys.Q) || k.IsKeyDown(Keys.Left))
-            {
-                _facingDirection = Direction.Left;
-                _playerSprite = Content.Load<Texture2D>("Sprite-Profile-Gauche");
-                newPosition.X -= speedPerSecond * deltaTime;
-            }
-
-            int tileSize = 32;
-            int futureTileX = (int)newPosition.X / tileSize;
-            int futureTileY = (int)newPosition.Y / tileSize;
-
-            if (_tiles != null &&
-                futureTileX >= 0 && futureTileX < _tiles.GetLength(0) &&
-                futureTileY >= 0 && futureTileY < _tiles.GetLength(1))
-            {
-                uint futureTile = _tiles[futureTileX, futureTileY];
-                if (futureTile != 0 && futureTile != 5)
-                {
-                    _playerPosition = newPosition;
-                }
-            }
-
-            _playerPosition.X = MathHelper.Clamp(_playerPosition.X, _playerSprite.Width / 2, _graphics.PreferredBackBufferWidth - _playerSprite.Width / 2);
-            _playerPosition.Y = MathHelper.Clamp(_playerPosition.Y, _playerSprite.Height / 2, _graphics.PreferredBackBufferHeight - _playerSprite.Height / 2);
-
-            int playerTileX = (int)(_playerPosition.X) / tileSize;
-            int playerTileY = (int)(_playerPosition.Y) / tileSize;
-            int targetX = playerTileX;
-            int targetY = playerTileY;
-
-            switch (_facingDirection)
-            {
-                case Direction.Up: targetY -= 1; break;
-                case Direction.Down: targetY += 1; break;
-                case Direction.Left: targetX -= 1; break;
-                case Direction.Right: targetX += 1; break;
-            }
-
-            if (_tiles != null &&
-                targetX >= 0 && targetX < _tiles.GetLength(0) &&
-                targetY >= 0 && targetY < _tiles.GetLength(1))
-            {
-                uint targetTile = _tiles[targetX, targetY];
-
-                if (targetTile != 0 && targetTile != 5 && targetTile != 4)
-                {
-                    if (mouse.LeftButton == ButtonState.Pressed)
-                    {
-                        if (_tiles[targetX, targetY] != 2)
-                        {
-                            _tiles[targetX, targetY] = 2;
-                            _compteurAction++;
-                        }
-                    }
-                    else if (mouse.RightButton == ButtonState.Pressed && targetTile == 2)
-                    {
-                        _tiles[targetX, targetY] = 3;
-                    }
-                }
-            }
-
-            base.Update(gameTime);
+            _playerPosition = newPosition;
         }
+    }
+
+    _playerPosition.X = MathHelper.Clamp(_playerPosition.X, _playerSprite.Width / 2, _graphics.PreferredBackBufferWidth - _playerSprite.Width / 2);
+    _playerPosition.Y = MathHelper.Clamp(_playerPosition.Y, _playerSprite.Height / 2, _graphics.PreferredBackBufferHeight - _playerSprite.Height / 2);
+
+    int playerTileX = (int)(_playerPosition.X) / tileSize;
+    int playerTileY = (int)(_playerPosition.Y) / tileSize;
+    int targetX = playerTileX;
+    int targetY = playerTileY;
+
+    switch (_facingDirection)
+    {
+        case Direction.Up: targetY -= 1; break;
+        case Direction.Down: targetY += 1; break;
+        case Direction.Left: targetX -= 1; break;
+        case Direction.Right: targetX += 1; break;
+    }
+
+    if (_tiles != null &&
+        targetX >= 0 && targetX < _tiles.GetLength(0) &&
+        targetY >= 0 && targetY < _tiles.GetLength(1))
+    {
+        uint targetTile = _tiles[targetX, targetY];
+
+        if (mouse.LeftButton == ButtonState.Pressed && _prevMouseState.LeftButton == ButtonState.Released)
+        {
+            if (targetTile != 0 && targetTile != 5 && targetTile != 4 && targetTile != 6 && targetTile != 7)
+            {
+                _tiles[targetX, targetY] = 2;
+                _compteurAction++;
+            }
+        }
+
+        if (mouse.RightButton == ButtonState.Pressed && _prevMouseState.RightButton == ButtonState.Released)
+        {
+            if (targetTile == 2)
+            {
+                _tiles[targetX, targetY] = 3;
+                _compteurAction++;
+            }
+        }
+
+        if (targetTile == 3)
+        {
+            if (k.IsKeyDown(Keys.D1))
+            {
+                _tiles[targetX, targetY] = 6;
+                _compteurAction++;
+            }
+            else if (k.IsKeyDown(Keys.D2))
+            {
+                _tiles[targetX, targetY] = 7;
+                _compteurAction++;
+            }
+        }
+    }
+
+    _prevMouseState = mouse;
+
+    base.Update(gameTime);
+}
+
 
         protected override void Draw(GameTime gameTime)
         {
@@ -236,6 +264,8 @@ namespace jeux
                             case 3: _spriteBatch.Draw(_spriteTerreLabouree, tilePosition, Color.White); break;
                             case 4: _spriteBatch.Draw(_spritePont, tilePosition, Color.White); break;
                             case 5: _spriteBatch.Draw(_spriteEau, tilePosition, Color.White); break;
+                            case 6: _spriteBatch.Draw(_spriteGraineMais, tilePosition, Color.White); break;
+                            case 7: _spriteBatch.Draw(_spriteGraineCarotte, tilePosition, Color.White); break;
                         }
                     }
                 }

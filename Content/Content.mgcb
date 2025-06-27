@@ -56,6 +56,30 @@
 /processorParam:TextureFormat=Color
 /build:Sprite-Face.png
 
+#begin Sprite-Graine-Carottes-Planter.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Sprite-Graine-Carottes-Planter.png
+
+#begin Sprite-Graine-Mais-Planter.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Sprite-Graine-Mais-Planter.png
+
 #begin Sprite-Grass.png
 /importer:TextureImporter
 /processor:TextureProcessor
